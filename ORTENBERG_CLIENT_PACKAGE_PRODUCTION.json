@@ -1,0 +1,78 @@
+{
+  "ortenberg_crypto_host_setup": {
+    "service_name": "Ortenberg Crypto Host",
+    "api_base_url": "https://ortenberg-crypto-host.onrender.com",
+    "environment": "production",
+    "master_wallet_address": "0xCbd831cD9F12D86CaB9Abbf2b6817C116400aEd9",
+    "api_keys": {
+      "live": "sk_live_ortenberg_client_001",
+      "test": "sk_test_ortenberg_client_001",
+      "spanish_client": "sk_live_spanish_client_urgent_001"
+    }
+  },
+  "endpoints": {
+    "health_check": "/health",
+    "master_wallet_info": "/api/v2/master-wallet/info",
+    "process_transaction": "/api/v2/usdt/process",
+    "check_status": "/api/v2/usdt/status/{process_id}",
+    "transaction_history": "/api/v2/usdt/history",
+    "balance_check": "/api/v2/wallet/balance-check",
+    "system_stats": "/api/v2/system/stats",
+    "supported_networks": "/api/v2/networks",
+    "pricing_info": "/api/v2/pricing"
+  },
+  "sample_transaction": {
+    "swift_release_confirmation": {
+      "swift_release_reference": "SWIFT-REL-2024-URGENT-001",
+      "releasing_bank_name": "Spanish Bank International",
+      "release_amount": "50000.00 USDT",
+      "compliance_status": "APPROVED",
+      "aml_check_status": "CLEARED"
+    },
+    "transaction_instructions": {
+      "source_wallet_address": "0xCbd831cD9F12D86CaB9Abbf2b6817C116400aEd9",
+      "destination_wallet_address": "0x742d35Cc6634C0532925a3b8D4C9db96590C6C87",
+      "usdt_amount": "50000.000000",
+      "network_preference": "ethereum_mainnet",
+      "priority": "HIGH"
+    },
+    "authentication": {
+      "client_id": "SPANISH_CLIENT_001",
+      "digital_signature": "0x24bf5e8c5d67cd672cb84f2b8228876bf638f57f12c6aa2686bba470448a3729",
+      "timestamp": "2025-06-11T01:05:55.940596"
+    }
+  },
+  "integration_guide": {
+    "authentication": {
+      "method": "Bearer Token",
+      "header": "Authorization: Bearer {api_key}",
+      "example": "Authorization: Bearer sk_live_spanish_client_urgent_001"
+    },
+    "request_format": {
+      "content_type": "application/json",
+      "method": "POST",
+      "url": "https://ortenberg-crypto-host.onrender.com/api/v2/usdt/process"
+    },
+    "response_format": {
+      "success": true,
+      "data": {
+        "process_id": "uuid-string",
+        "status": "PROCESSING",
+        "tracking_url": "/api/v2/usdt/status/{process_id}"
+      }
+    }
+  },
+  "testing_instructions": {
+    "step_1": "Test health check: GET https://ortenberg-crypto-host.onrender.com/health",
+    "step_2": "Check master wallet: GET https://ortenberg-crypto-host.onrender.com/api/v2/master-wallet/info",
+    "step_3": "Submit test transaction: POST https://ortenberg-crypto-host.onrender.com/api/v2/usdt/process",
+    "step_4": "Monitor transaction status using returned process_id"
+  },
+  "production_ready": {
+    "deployment_status": "LIVE",
+    "ssl_certificate": "ACTIVE",
+    "uptime_monitoring": "ENABLED",
+    "backup_systems": "CONFIGURED",
+    "support_contact": "support@ortenberg-crypto-host.com"
+  }
+}

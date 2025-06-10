@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "env": {
+    "ENVIRONMENT": "production",
+    "API_KEY_LIVE": "sk_live_ortenberg_client_001",
+    "API_KEY_TEST": "sk_test_ortenberg_client_001",
+    "SPANISH_API_KEY": "sk_live_spanish_client_urgent_001"
+  }
+}
