@@ -1,0 +1,53 @@
+{
+  "spanish_client_setup": {
+    "api_base_url": "http://localhost:8000",
+    "master_wallet_address": "0xaabc787e77284686D71017028AC8d8f96B6C8A19",
+    "api_key_live": "sk_live_spanish_client_urgent_001",
+    "api_key_test": "sk_test_spanish_client_001"
+  },
+  "endpoints": {
+    "process_transaction": "/api/v2/usdt/process",
+    "check_status": "/api/v2/usdt/status/{process_id}",
+    "wallet_info": "/api/v2/master-wallet/info",
+    "balance_check": "/api/v2/wallet/balance-check",
+    "system_health": "/health"
+  },
+  "sample_transaction": {
+    "swift_release_confirmation": {
+      "swift_release_reference": "SWIFT-REL-2024-URGENT-001",
+      "releasing_bank_name": "Spanish Bank International",
+      "release_amount": "50000.00 USDT",
+      "compliance_status": "APPROVED",
+      "aml_check_status": "CLEARED"
+    },
+    "transaction_instructions": {
+      "source_wallet_address": "0xaabc787e77284686D71017028AC8d8f96B6C8A19",
+      "destination_wallet_address": "0x742d35Cc6634C0532925a3b8D4C9db96590C6C87",
+      "usdt_amount": "50000.000000",
+      "network_preference": "ethereum_mainnet",
+      "priority": "HIGH"
+    },
+    "authentication": {
+      "client_id": "SPANISH_CLIENT_001",
+      "digital_signature": "0xd4f0f2a07b51fc7f3e442d592beba5cb8a48bc3b988495b7b9b755d62d551c18",
+      "timestamp": "2025-06-11T00:10:57.514708"
+    }
+  },
+  "curl_examples": {
+    "health_check": "curl http://localhost:8000/health",
+    "wallet_info": "curl -H 'Authorization: Bearer sk_live_spanish_client_urgent_001' http://localhost:8000/api/v2/master-wallet/info",
+    "process_transaction": "curl -X POST -H 'Authorization: Bearer sk_live_spanish_client_urgent_001' -H 'Content-Type: application/json' -d @sample_transaction.json http://localhost:8000/api/v2/usdt/process"
+  },
+  "deployment_info": {
+    "status": "LIVE",
+    "deployment_time": "2025-06-11T00:10:57.514708",
+    "estimated_processing_time": "30 seconds",
+    "supported_networks": [
+      "ethereum_mainnet"
+    ],
+    "supported_tokens": [
+      "USDT",
+      "ETH"
+    ]
+  }
+}

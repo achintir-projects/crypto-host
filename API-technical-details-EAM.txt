@@ -1,0 +1,30 @@
+the sender sends the token to the reciever's master wallet using API Gateway
+the APIGateway uses only API to simplify the Auth Process
+The API Gateway will pass the transaction using private node blockchain to send to the master wallet
+
+how it all starts: 
+the bank provides the fund
+alchemy network provides the systemtoconvert FIAT to Token
+the processed token is snet to the receiver's master wallet 
+the sender can use their master wallet that has been used in the smart contract used in the conversion process between bank and alchemy ORuse a preferred system
+the configuration of the master wallet has already been done using CIFO Blockchain server
+
+Fund type: downloaded, converted and tokenized in ERC20 (USDT or ETH) and needs to be processed using API connection only...
+technical details of the API
+Endpoint:
+IP address
+Domain
+URL of endpoint
+
+APIGateway server
+IP address
+API Key
+API sceret key
+
+Master wallet - usually wallet from GETH creation
+
+Technical condition of Node Server
+Dashboard: 
+Chains: Repository source -> full node: using emote is syncing
+Geth: synced #22138066 -> Peers:99
+Lodestar: synced #11354397 -> peers: 95

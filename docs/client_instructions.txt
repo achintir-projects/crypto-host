@@ -1,0 +1,45 @@
+CLIENT INSTRUCTIONS FOR USDT PROCESSING
+=======================================
+
+STEP 1: GET BANK RELEASE
+- Contact your bank to initiate SWIFT release
+- Obtain compliance approval (AML/KYC)
+- Receive bank-signed release document
+
+STEP 2: PREPARE FILE
+- Format release data as JSON
+- Include bank confirmation details
+- Add your digital signature
+- Set blockchain execution parameters
+
+STEP 3: SUBMIT TO US
+- Upload file via our API
+- Or use direct JSON submission
+- Include client ID and authentication
+
+STEP 4: WE EXECUTE
+- We validate your file
+- Execute USDT transfers on blockchain
+- Provide transaction confirmations
+- Send completion notifications
+
+WHAT WE NEED FROM YOU:
+- Pre-released SWIFT file (JSON format)
+- Bank release confirmation
+- Digital signature for authentication
+- Blockchain execution preferences
+
+WHAT WE PROVIDE:
+- Fast blockchain execution (5-30 minutes)
+- Transaction confirmations and receipts
+- Real-time status updates
+- Complete audit trail
+
+PRICING:
+- File validation: Free
+- Transfer execution: 0.1% of amount
+- Gas fees: At cost
+
+CONTACT:
+- Technical Support: 24/7 via API
+- Business Inquiries: business@usdt-processor.com

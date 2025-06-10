@@ -1,0 +1,19 @@
+{
+  "swift_release_confirmation": {
+    "swift_release_reference": "SWIFT-REL-2024-001234",
+    "releasing_bank_name": "Chase Bank N.A.",
+    "release_amount": "50000.00 USDT",
+    "compliance_status": "APPROVED",
+    "aml_check_status": "CLEARED"
+  },
+  "transaction_instructions": {
+    "source_wallet_address": "0xA1B2C3D4E5F6789012345678901234567890ABCD",
+    "destination_wallet_address": "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2",
+    "usdt_amount": "50000.000000",
+    "network_preference": "ethereum_mainnet"
+  },
+  "authentication": {
+    "client_id": "SPANISH_CLIENT_001",
+    "digital_signature": "0x987654321fedcba987654321fedcba9876543210"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "api_endpoints": {
+    "file_upload": {
+      "endpoint": "/api/v1/usdt/upload",
+      "method": "POST",
+      "description": "Upload pre-released USDT file for processing",
+      "content_type": "multipart/form-data",
+      "parameters": {
+        "file": "JSON file with SWIFT release data",
+        "client_id": "Your client identifier",
+        "signature": "Digital signature for authentication"
+      },
+      "response": {
+        "upload_id": "Unique upload identifier",
+        "status": "uploaded|validating|processing|complete|error",
+        "estimated_completion": "ISO 8601 timestamp"
+      }
+    },
+    "direct_json": {
+      "endpoint": "/api/v1/usdt/process",
+      "method": "POST",
+      "description": "Submit JSON directly for immediate processing",
+      "content_type": "application/json",
+      "response": {
+        "process_id": "Unique process identifier",
+        "status": "processing|complete|error",
+        "transaction_hashes": [
+          "0x..."
+        ]
+      }
+    },
+    "status_check": {
+      "endpoint": "/api/v1/usdt/status/{process_id}",
+      "method": "GET",
+      "description": "Check processing status",
+      "response": {
+        "process_id": "Process identifier",
+        "status": "Current status",
+        "progress": "Percentage complete",
+        "transactions": "Array of transaction details"
+      }
+    }
+  },
+  "authentication": {
+    "method": "API Key + Digital Signature",
+    "api_key_header": "X-API-Key",
+    "signature_header": "X-Digital-Signature",
+    "timestamp_header": "X-Timestamp"
+  },
+  "rate_limits": {
+    "file_upload": "10 files per hour",
+    "direct_json": "100 requests per hour",
+    "status_check": "1000 requests per hour"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "swift_release_confirmation": {
+    "swift_release_reference": "SWIFT-REL-2024-0115-001234",
+    "releasing_bank_name": "Chase Bank N.A.",
+    "releasing_bank_swift": "CHASUS33XXX",
+    "release_date_time": "2024-01-15T09:00:00Z",
+    "authorized_signatory": "John Smith, VP International Transfers",
+    "release_amount": "50000.00 USDT",
+    "beneficiary_details": {
+      "name": "Spanish Investment Group",
+      "account": "ES91 2100 0418 4502 0005 1332",
+      "address": "Madrid, Spain"
+    },
+    "compliance_status": "APPROVED",
+    "aml_check_status": "CLEARED"
+  },
+  "transaction_instructions": {
+    "source_wallet_address": "0xA1B2C3D4E5F6789012345678901234567890ABCD",
+    "destination_wallet_address": "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2",
+    "usdt_amount": "50000.000000",
+    "usdt_contract_address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "network_preference": "ethereum_mainnet",
+    "gas_price_preference": "standard",
+    "execution_priority": "high"
+  },
+  "authentication": {
+    "client_id": "SPANISH_CLIENT_001",
+    "digital_signature": "0x987654321fedcba987654321fedcba9876543210",
+    "file_hash": "sha256:abcdef1234567890abcdef1234567890abcdef12",
+    "submission_timestamp": "2024-01-15T10:30:00Z"
+  }
+}

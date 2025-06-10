@@ -1,0 +1,13 @@
+{
+  "name": "ortenberg-crypto-host",
+  "version": "2.0.0",
+  "description": "Enterprise-grade cryptocurrency processing system",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "uvicorn app:app --reload --host 0.0.0.0 --port 8000"
+  },
+  "keywords": ["crypto", "usdt", "ethereum", "api", "ortenberg"],
+  "author": "Ortenberg Crypto Host",
+  "license": "MIT"
+}

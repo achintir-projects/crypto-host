@@ -1,0 +1,40 @@
+{
+  "swift_release_confirmation": {
+    "swift_release_reference": "SWIFT-REL-2024-0115-005678",
+    "releasing_bank_name": "Deutsche Bank AG",
+    "releasing_bank_swift": "DEUTDEFFXXX",
+    "release_date_time": "2024-01-15T11:30:00Z",
+    "authorized_signatory": "Maria Schmidt, Head of Digital Assets",
+    "release_amount": "100000.00 USDT",
+    "compliance_status": "APPROVED"
+  },
+  "transaction_instructions": [
+    {
+      "destination_id": 1,
+      "source_wallet_address": "0xDEADBEEF123456789ABCDEF123456789ABCDEF12",
+      "destination_wallet_address": "0x1111111111111111111111111111111111111111",
+      "usdt_amount": "40000.000000",
+      "execution_priority": "high"
+    },
+    {
+      "destination_id": 2,
+      "source_wallet_address": "0xDEADBEEF123456789ABCDEF123456789ABCDEF12",
+      "destination_wallet_address": "0x2222222222222222222222222222222222222222",
+      "usdt_amount": "35000.000000",
+      "execution_priority": "high"
+    },
+    {
+      "destination_id": 3,
+      "source_wallet_address": "0xDEADBEEF123456789ABCDEF123456789ABCDEF12",
+      "destination_wallet_address": "0x3333333333333333333333333333333333333333",
+      "usdt_amount": "25000.000000",
+      "execution_priority": "normal"
+    }
+  ],
+  "authentication": {
+    "client_id": "INSTITUTIONAL_CLIENT_002",
+    "digital_signature": "0x123456789abcdef123456789abcdef1234567890",
+    "file_hash": "sha256:fedcba0987654321fedcba0987654321fedcba09",
+    "submission_timestamp": "2024-01-15T12:00:00Z"
+  }
+}

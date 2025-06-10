@@ -1,0 +1,21 @@
+{
+  "swift_release_confirmation": {
+    "swift_release_reference": "SWIFT-REL-2024-URGENT-001",
+    "releasing_bank_name": "Spanish Bank International",
+    "release_amount": "50000.00 USDT",
+    "compliance_status": "APPROVED",
+    "aml_check_status": "CLEARED"
+  },
+  "transaction_instructions": {
+    "source_wallet_address": "0xaabc787e77284686D71017028AC8d8f96B6C8A19",
+    "destination_wallet_address": "0x742d35Cc6634C0532925a3b8D4C9db96590C6C87",
+    "usdt_amount": "50000.000000",
+    "network_preference": "ethereum_mainnet",
+    "priority": "HIGH"
+  },
+  "authentication": {
+    "client_id": "SPANISH_CLIENT_001",
+    "digital_signature": "0xd4f0f2a07b51fc7f3e442d592beba5cb8a48bc3b988495b7b9b755d62d551c18",
+    "timestamp": "2025-06-11T00:10:57.514708"
+  }
+}
