@@ -167,7 +167,16 @@ class MasterWalletManager:
         if current_dir not in sys.path:
             sys.path.insert(0, current_dir)
 
-        import updated_config_dynamic as config
+        # Attempt to import updated_config_dynamic from the same directory as this file
+        import importlib.util
+        import sys
+        import os
+
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+        spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
+        config = importlib.util.module_from_spec(spec)
+        sys.modules["updated_config_dynamic"] = config
+        spec.loader.exec_module(config)
 
         master_wallet = {
             "address": config.MASTER_WALLET_ADDRESS,
