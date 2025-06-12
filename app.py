@@ -157,42 +157,19 @@ class MasterWalletManager:
         raise Exception("? No active Web3 connections")
     
     def setup_master_wallet(self):
-        """Setup master wallet from environment or generate new"""
-        try:
-            if Config.MASTER_WALLET_PRIVATE_KEY and Config.MASTER_WALLET_ADDRESS:
-                # Use existing wallet from environment
-                master_wallet = {
-                    "address": Config.MASTER_WALLET_ADDRESS,
-                    "private_key": Config.MASTER_WALLET_PRIVATE_KEY,
-                    "created_at": datetime.now().isoformat(),
-                    "purpose": "ORTENBERG_CRYPTO_HOST_MASTER_WALLET",
-                    "security_level": "PRODUCTION_GRADE",
-                    "source": "ENVIRONMENT_VARIABLE"
-                }
-            else:
-                # Generate new wallet
-                account = Account.create()
-                master_wallet = {
-                    "address": account.address,
-                    "private_key": account.key.hex(),
-                    "created_at": datetime.now().isoformat(),
-                    "purpose": "ORTENBERG_CRYPTO_HOST_MASTER_WALLET",
-                    "security_level": "PRODUCTION_GRADE",
-                    "source": "GENERATED"
-                }
-                
-                print(f"?? NEW MASTER WALLET GENERATED!")
-                print(f"?? Address: {master_wallet['address']}")
-                print(f"?? Private Key: {master_wallet['private_key']}")
-                print(f"??  SAVE THESE CREDENTIALS SECURELY!")
-            
-            self.wallets["master"] = master_wallet
-            print(f"?? Master Wallet Ready: {master_wallet['address']}")
-            return master_wallet
-            
-        except Exception as e:
-            print(f"? Master wallet setup failed: {e}")
-            raise
+        """Setup master wallet strictly from hardcoded config without fallback"""
+        from usdt_processor.updated_config_dynamic import config
+        master_wallet = {
+            "address": config.MASTER_WALLET_ADDRESS,
+            "private_key": config.MASTER_WALLET_PRIVATE_KEY,
+            "created_at": datetime.now().isoformat(),
+            "purpose": "ORTENBERG_CRYPTO_HOST_MASTER_WALLET",
+            "security_level": "PRODUCTION_GRADE",
+            "source": "HARDCODED_CONFIG"
+        }
+        self.wallets["master"] = master_wallet
+        print(f"?? Master Wallet Ready: {master_wallet['address']}")
+        return master_wallet
     
     def get_master_wallet(self):
         """Get master wallet details"""
