@@ -158,7 +158,7 @@ class MasterWalletManager:
     
     def setup_master_wallet(self):
         """Setup master wallet strictly from hardcoded config without fallback"""
-        from usdt_processor.updated_config_dynamic import config
+        from .updated_config_dynamic import config
         master_wallet = {
             "address": config.MASTER_WALLET_ADDRESS,
             "private_key": config.MASTER_WALLET_PRIVATE_KEY,
