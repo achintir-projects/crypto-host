@@ -158,7 +158,17 @@ class MasterWalletManager:
     
     def setup_master_wallet(self):
         """Setup master wallet strictly from hardcoded config without fallback"""
-        from .updated_config_dynamic import config
+        import sys
+        import importlib.util
+        import os
+
+        # Fix for relative import error in deployment: use absolute import with sys.path adjustment
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        if current_dir not in sys.path:
+            sys.path.insert(0, current_dir)
+
+        import updated_config_dynamic as config
+
         master_wallet = {
             "address": config.MASTER_WALLET_ADDRESS,
             "private_key": config.MASTER_WALLET_PRIVATE_KEY,
