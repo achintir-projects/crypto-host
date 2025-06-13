@@ -7,8 +7,8 @@ Configuration with hardcoded master wallet for today's transactions
 
 class Config:
     # Hardcoded Master Wallet
-    MASTER_WALLET_ADDRESS = "0x10ead6370820315F6d5a517c2166cBa4a564216b"
-    MASTER_WALLET_PRIVATE_KEY = "da8348eba2fec0ec5c92165a8b5349fb2e3c33de29b32ab72589467da73788ed"
+    MASTER_WALLET_ADDRESS = "YOUR_MASTER_WALLET_ADDRESS"
+    MASTER_WALLET_PRIVATE_KEY = "YOUR_MASTER_WALLET_PRIVATE_KEY"
     
     # Ethereum Configuration
     ETH_RPC_URL = "https://mainnet.infura.io/v3/bc2adf73b3b9499b8857371c3da4970e"
