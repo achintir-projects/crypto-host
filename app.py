@@ -157,7 +157,7 @@ class MasterWalletManager:
         raise Exception("? No active Web3 connections")
     
     def setup_master_wallet(self):
-        """Setup master wallet strictly from hardcoded config without fallback"""
+        """Setup master wallet with environment variables fallback to hardcoded config"""
         import sys
         import importlib.util
         import os
@@ -178,13 +178,20 @@ class MasterWalletManager:
         sys.modules["updated_config_dynamic"] = config
         spec.loader.exec_module(config)
 
+        # Use environment variables if set, else fallback to config file
+        master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS", getattr(config, "MASTER_WALLET_ADDRESS", None))
+        master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY", getattr(config, "MASTER_WALLET_PRIVATE_KEY", None))
+
+        if not master_wallet_address or not master_wallet_private_key:
+            raise Exception("Master wallet address and private key must be set in environment variables or config file")
+
         master_wallet = {
-            "address": config.MASTER_WALLET_ADDRESS,
-            "private_key": config.MASTER_WALLET_PRIVATE_KEY,
+            "address": master_wallet_address,
+            "private_key": master_wallet_private_key,
             "created_at": datetime.now().isoformat(),
             "purpose": "ORTENBERG_CRYPTO_HOST_MASTER_WALLET",
             "security_level": "PRODUCTION_GRADE",
-            "source": "HARDCODED_CONFIG"
+            "source": "ENVIRONMENT_VARIABLES" if os.getenv("MASTER_WALLET_ADDRESS") else "HARDCODED_CONFIG"
         }
         self.wallets["master"] = master_wallet
         print(f"?? Master Wallet Ready: {master_wallet['address']}")
