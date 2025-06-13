@@ -11,8 +11,8 @@ class Config:
     MASTER_WALLET_PRIVATE_KEY = "da8348eba2fec0ec5c92165a8b5349fb2e3c33de29b32ab72589467da73788ed"
     
     # Ethereum Configuration
-    ETH_RPC_URL = "https://mainnet.infura.io/v3/YOUR_INFURA_KEY"
-    SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY"
+    ETH_RPC_URL = "https://mainnet.infura.io/v3/bc2adf73b3b9499b8857371c3da4970e"
+    SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/bc2adf73b3b9499b8857371c3da4970e"
     USDT_CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     
     # API Configuration
