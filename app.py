@@ -182,6 +182,9 @@ class MasterWalletManager:
         master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS", getattr(config, "MASTER_WALLET_ADDRESS", None))
         master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY", getattr(config, "MASTER_WALLET_PRIVATE_KEY", None))
 
+        print(f"DEBUG: MASTER_WALLET_ADDRESS from env: {master_wallet_address}")
+        print(f"DEBUG: MASTER_WALLET_PRIVATE_KEY from env: {'***masked***' if master_wallet_private_key else None}")
+
         if not master_wallet_address or not master_wallet_private_key:
             raise Exception("Master wallet address and private key must be set in environment variables or config file")
 
