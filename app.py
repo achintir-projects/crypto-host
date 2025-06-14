@@ -183,13 +183,13 @@ class MasterWalletManager:
         master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS")
         master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY")
 
-        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config, 'MASTER_WALLET_ADDRESS', None)}")
-        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
+        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config.config, 'MASTER_WALLET_ADDRESS', None)}")
+        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config.config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
 
         if not master_wallet_address or not master_wallet_private_key:
             print("DEBUG: Environment variables not set, falling back to config file")
-            master_wallet_address = getattr(config, "MASTER_WALLET_ADDRESS", None)
-            master_wallet_private_key = getattr(config, "MASTER_WALLET_PRIVATE_KEY", None)
+            master_wallet_address = getattr(config.config, "MASTER_WALLET_ADDRESS", None)
+            master_wallet_private_key = getattr(config.config, "MASTER_WALLET_PRIVATE_KEY", None)
 
         print(f"DEBUG: MASTER_WALLET_ADDRESS used: {master_wallet_address}")
         print(f"DEBUG: MASTER_WALLET_PRIVATE_KEY used: {'***masked***' if master_wallet_private_key else None}")
