@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# List files in /app to verify updated_config_dynamic.py presence
+RUN ls -l /app
+
 # Remove Python cache files to avoid stale bytecode
 RUN find . -type d -name "__pycache__" -exec rm -rf {} + && find . -name "*.pyc" -delete
 
