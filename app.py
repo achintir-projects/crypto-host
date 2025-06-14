@@ -173,6 +173,7 @@ class MasterWalletManager:
         import os
 
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+        print(f"DEBUG: Loading updated_config_dynamic.py from path: {config_path}")
         spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
         config = importlib.util.module_from_spec(spec)
         sys.modules["updated_config_dynamic"] = config
