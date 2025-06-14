@@ -130,8 +130,6 @@ class MasterWalletManager:
         self.wallets = {}
         self.w3_instances = []
         self.setup_web3_connections()
-        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config, 'MASTER_WALLET_ADDRESS', None)}")
-        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
         self.setup_master_wallet()
     
     def setup_web3_connections(self):
@@ -184,6 +182,9 @@ class MasterWalletManager:
         # Use environment variables if set, else fallback to config file
         master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS")
         master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY")
+
+        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config, 'MASTER_WALLET_ADDRESS', None)}")
+        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
 
         if not master_wallet_address or not master_wallet_private_key:
             print("DEBUG: Environment variables not set, falling back to config file")
