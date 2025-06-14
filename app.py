@@ -130,6 +130,8 @@ class MasterWalletManager:
         self.wallets = {}
         self.w3_instances = []
         self.setup_web3_connections()
+        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config, 'MASTER_WALLET_ADDRESS', None)}")
+        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
         self.setup_master_wallet()
     
     def setup_web3_connections(self):
