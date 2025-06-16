@@ -12,17 +12,17 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900 text-gray-100">
     <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
+    <div class="bg-gray-800 border-b border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-6">
-                <h1 class="text-2xl font-bold text-gray-900">Deposit Transaction Dashboard</h1>
+                <h1 class="text-2xl font-bold text-white">Deposit Transaction Dashboard</h1>
                 <div class="flex space-x-4">
-                    <button id="refreshBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    <button id="refreshBtn" class="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition-colors">
                         Refresh Data
                     </button>
-                    <button id="newDepositBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                    <button id="newDepositBtn" class="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-800 transition-colors">
                         New Deposit
                     </button>
                 </div>
@@ -34,37 +34,37 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-sm font-medium text-gray-500">Total Deposits</h3>
-                <p class="text-2xl font-semibold text-gray-900" id="totalDeposits">-</p>
+            <div class="bg-gray-800 p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-400">Total Deposits</h3>
+                <p class="text-2xl font-semibold text-white" id="totalDeposits">-</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-sm font-medium text-gray-500">Pending Deposits</h3>
-                <p class="text-2xl font-semibold text-gray-900" id="pendingDeposits">-</p>
+            <div class="bg-gray-800 p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-400">Pending Deposits</h3>
+                <p class="text-2xl font-semibold text-white" id="pendingDeposits">-</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-sm font-medium text-gray-500">Success Rate</h3>
-                <p class="text-2xl font-semibold text-gray-900" id="successRate">-</p>
+            <div class="bg-gray-800 p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-400">Success Rate</h3>
+                <p class="text-2xl font-semibold text-white" id="successRate">-</p>
             </div>
         </div>
 
         <!-- Transactions Table -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h2 class="text-lg font-medium text-gray-900">Recent Transactions</h2>
+        <div class="bg-gray-800 shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-700">
+                <h2 class="text-lg font-medium text-white">Recent Transactions</h2>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-900">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction Hash</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction Hash</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Timestamp</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="transactionsTable">
+                    <tbody class="bg-gray-800 divide-y divide-gray-700" id="transactionsTable">
                         <!-- Transactions will be inserted here -->
                     </tbody>
                 </table>
@@ -73,25 +73,25 @@
     </div>
 
     <!-- New Deposit Modal -->
-    <div id="depositModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 class="text-xl font-semibold mb-4">New Deposit</h2>
+    <div id="depositModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h2 class="text-xl font-semibold mb-4 text-white">New Deposit</h2>
             <form id="depositForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Sender Address</label>
-                    <input type="text" name="sender" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-300">Sender Address</label>
+                    <input type="text" name="sender" class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-white" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Amount (ETH)</label>
-                    <input type="number" step="0.000001" name="amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-300">Amount (ETH)</label>
+                    <input type="number" step="0.000001" name="amount" class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-white" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Destination Address</label>
-                    <input type="text" name="destination_address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <label class="block text-sm font-medium text-gray-300">Destination Address</label>
+                    <input type="text" name="destination_address" class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-white" required>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancelDeposit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Submit Deposit</button>
+                    <button type="button" id="cancelDeposit" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600">Cancel</button>
+                    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800">Submit Deposit</button>
                 </div>
             </form>
         </div>
