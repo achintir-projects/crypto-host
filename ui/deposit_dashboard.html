@@ -127,7 +127,7 @@
             test: '0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2',
             production: '0x10ead6370820315F6d5a517c2166cBa4a564216b'
         };
-        const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = 'http://localhost:8000';
         let currentEnvironment = 'test';
 
         // DOM Elements
@@ -180,12 +180,19 @@
         // Fetch and display transactions
         async function fetchTransactions() {
             try {
+                console.log('Fetching transactions...');
+                console.log('API URL:', `${API_BASE_URL}/api/v2/usdt/history`);
+                console.log('Using API Key:', API_KEYS[currentEnvironment]);
+
                 const response = await fetch(`${API_BASE_URL}/api/v2/usdt/history`, {
                     headers: {
                         'Authorization': `Bearer ${API_KEYS[currentEnvironment]}`
                     }
                 });
+                
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.success) {
                     updateStats(data.data);
@@ -198,9 +205,10 @@
 
         // Update statistics
         function updateStats(data) {
-            const totalDeposits = data.transactions.length;
-            const pendingDeposits = data.transactions.filter(tx => tx.status === 'PROCESSING').length;
-            const successfulDeposits = data.transactions.filter(tx => tx.status === 'CONFIRMED').length;
+            const transactions = data.transactions || [];
+            const totalDeposits = transactions.length;
+            const pendingDeposits = transactions.filter(tx => tx.status === 'PROCESSING').length;
+            const successfulDeposits = transactions.filter(tx => tx.status === 'CONFIRMED').length;
             const successRate = totalDeposits ? ((successfulDeposits / totalDeposits) * 100).toFixed(1) : 0;
 
             document.getElementById('totalDeposits').textContent = totalDeposits;
@@ -210,13 +218,22 @@
 
         // Update transactions table
         function updateTransactionsTable(transactions) {
+            if (!Array.isArray(transactions)) {
+                console.error('Transactions is not an array:', transactions);
+                return;
+            }
+
             transactionsTable.innerHTML = transactions.map(tx => `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tx.transaction_hash || 'Pending'}</td>
+                <tr class="hover:bg-gray-700">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        ${tx.transaction_hash ? 
+                            `<span class="font-mono">${tx.transaction_hash.substring(0, 10)}...${tx.transaction_hash.substring(tx.transaction_hash.length - 8)}</span>` 
+                            : 'Pending'}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${tx.network === 'sepolia' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
-                            ${tx.network === 'sepolia' ? 'TEST' : 'PRODUCTION'}
+                            ${(['sepolia', 'testnet'].includes(tx.network) ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')}">
+                            ${(['sepolia', 'testnet'].includes(tx.network) ? 'TEST' : 'PRODUCTION')}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -227,11 +244,17 @@
                             ${tx.status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tx.amount || '-'} ETH</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${new Date(tx.timestamp).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        ${tx.amount || tx.value ? `${Number(tx.amount || tx.value).toFixed(6)} ETH` : '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        ${tx.timestamp || tx.created_at ? new Date(tx.timestamp || tx.created_at).toLocaleString() : '-'}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <button onclick="viewTransaction('${tx.transaction_hash}', '${tx.network}')" 
-                                class="text-blue-400 hover:text-blue-300">View</button>
+                        ${tx.transaction_hash ? 
+                            `<button onclick="viewTransaction('${tx.transaction_hash}', '${tx.network}')" 
+                                    class="text-blue-400 hover:text-blue-300">View</button>`
+                            : '-'}
                     </td>
                 </tr>
             `).join('');
@@ -248,6 +271,10 @@
                 destination_address: formData.get('destination_address')
             };
 
+            console.log('Submitting deposit:', depositData);
+            console.log('API URL:', `${API_BASE_URL}/api/v2/broadcast/deposit`);
+            console.log('Using API Key:', API_KEYS[currentEnvironment]);
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v2/broadcast/deposit`, {
                     method: 'POST',
@@ -258,13 +285,15 @@
                     body: JSON.stringify(depositData)
                 });
 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response data:', result);
                 
                 if (response.ok) {
                     alert('Deposit submitted successfully!');
                     depositModal.classList.add('hidden');
                     depositForm.reset();
-                    fetchTransactions();
+                    await fetchTransactions();
                 } else {
                     throw new Error(result.detail || 'Failed to submit deposit');
                 }
