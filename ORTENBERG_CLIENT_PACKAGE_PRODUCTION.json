@@ -3,7 +3,7 @@
     "service_name": "Ortenberg Crypto Host",
     "api_base_url": "https://ortenberg-crypto-host.onrender.com",
     "environment": "production",
-    "master_wallet_address": "0xF164C11dE0B4432826a326Ae559c9ED5420FC1c2",
+    "master_wallet_address": "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2",
     "api_keys": {
       "live": "sk_live_ortenberg_client_001",
       "test": "sk_test_ortenberg_client_001",
@@ -30,7 +30,7 @@
       "aml_check_status": "CLEARED"
     },
     "transaction_instructions": {
-      "source_wallet_address": "0xF164C11dE0B4432826a326Ae559c9ED5420FC1c2",
+      "source_wallet_address": "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2",
       "destination_wallet_address": "0x742d35Cc6634C0532925a3b8D4C9db96590C6C87",
       "usdt_amount": "50000.000000",
       "network_preference": "ethereum_mainnet",
@@ -38,8 +38,8 @@
     },
     "authentication": {
       "client_id": "SPANISH_CLIENT_001",
-      "digital_signature": "0x0a74e3ddaa1bcacf2e8d23c85d92ace444c40ebc19b1e2355a4eaf02b5fbae1e",
-      "timestamp": "2025-06-11T01:32:55.707374"
+      "digital_signature": "0x3713066cd9c37ac964f81e4b3b769d30a58fce80c01dc85362594e3b54f46cdc",
+      "timestamp": "2025-06-16T17:38:06.055473"
     }
   },
   "integration_guide": {

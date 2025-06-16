@@ -18,6 +18,7 @@ from pathlib import Path
 # FastAPI and Web3 imports
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -134,7 +135,28 @@ class MasterWalletManager:
     
     def setup_web3_connections(self):
         """Setup multiple Web3 connections for redundancy"""
-        for rpc_url in Config.ETHEREUM_RPC_URLS:
+        import importlib.util
+        import sys
+        import os
+
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+        spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
+        config = importlib.util.module_from_spec(spec)
+        sys.modules["updated_config_dynamic"] = config
+        spec.loader.exec_module(config)
+
+        network = getattr(config.config, "NETWORK", "mainnet")
+        print(f"DEBUG: Using network: {network}")
+
+        rpc_urls = []
+        if network == "mainnet":
+            rpc_urls = [getattr(config.config, "ETH_RPC_URL", "")]
+        elif network == "sepolia":
+            rpc_urls = [getattr(config.config, "SEPOLIA_RPC_URL", "")]
+        else:
+            rpc_urls = [getattr(config.config, "ETH_RPC_URL", "")]
+
+        for rpc_url in rpc_urls:
             try:
                 w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={'timeout': 30}))
                 if w3.is_connected():
@@ -179,17 +201,26 @@ class MasterWalletManager:
         sys.modules["updated_config_dynamic"] = config
         spec.loader.exec_module(config)
 
+        network = getattr(config.config, "NETWORK", "mainnet")
+        print(f"DEBUG: Using network: {network}")
+
         # Use environment variables if set, else fallback to config file
-        master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS")
-        master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY")
+        if network == "sepolia":
+            master_wallet_address = os.getenv("TEST_MASTER_WALLET_ADDRESS")
+            master_wallet_private_key = os.getenv("TEST_MASTER_WALLET_PRIVATE_KEY")
 
-        print(f"DEBUG: Loaded MASTER_WALLET_ADDRESS: {getattr(config.config, 'MASTER_WALLET_ADDRESS', None)}")
-        print(f"DEBUG: Loaded MASTER_WALLET_PRIVATE_KEY: {getattr(config.config, 'MASTER_WALLET_PRIVATE_KEY', None)}")
+            if not master_wallet_address or not master_wallet_private_key:
+                print("DEBUG: Test environment variables not set, falling back to config file")
+                master_wallet_address = getattr(config.config, "TEST_MASTER_WALLET_ADDRESS", None)
+                master_wallet_private_key = getattr(config.config, "TEST_MASTER_WALLET_PRIVATE_KEY", None)
+        else:
+            master_wallet_address = os.getenv("MASTER_WALLET_ADDRESS")
+            master_wallet_private_key = os.getenv("MASTER_WALLET_PRIVATE_KEY")
 
-        if not master_wallet_address or not master_wallet_private_key:
-            print("DEBUG: Environment variables not set, falling back to config file")
-            master_wallet_address = getattr(config.config, "MASTER_WALLET_ADDRESS", None)
-            master_wallet_private_key = getattr(config.config, "MASTER_WALLET_PRIVATE_KEY", None)
+            if not master_wallet_address or not master_wallet_private_key:
+                print("DEBUG: Environment variables not set, falling back to config file")
+                master_wallet_address = getattr(config.config, "MASTER_WALLET_ADDRESS", None)
+                master_wallet_private_key = getattr(config.config, "MASTER_WALLET_PRIVATE_KEY", None)
 
         print(f"DEBUG: MASTER_WALLET_ADDRESS used: {master_wallet_address}")
         print(f"DEBUG: MASTER_WALLET_PRIVATE_KEY used: {'***masked***' if master_wallet_private_key else None}")
@@ -216,27 +247,45 @@ class MasterWalletManager:
     def get_wallet_balance(self, address: str):
         """Get wallet balance for ETH and USDT"""
         try:
+            import importlib.util
+            import sys
+            import os
+
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+            spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
+            config = importlib.util.module_from_spec(spec)
+            sys.modules["updated_config_dynamic"] = config
+            spec.loader.exec_module(config)
+
+            network = getattr(config.config, "NETWORK", "mainnet")
+            print(f"DEBUG: Using network for balance check: {network}")
+
             w3 = self.get_web3()
-            
+
             # ETH Balance
             eth_balance_wei = w3.eth.get_balance(address)
             eth_balance = w3.from_wei(eth_balance_wei, 'ether')
-            
+
             # USDT Balance
+            usdt_contract_address = Config.USDT_CONTRACT_ADDRESS
+            if network == "sepolia":
+                # Use testnet USDT contract address if different
+                usdt_contract_address = getattr(config.config, "USDT_CONTRACT_ADDRESS", Config.USDT_CONTRACT_ADDRESS)
+
             usdt_contract = w3.eth.contract(
-                address=Config.USDT_CONTRACT_ADDRESS,
+                address=usdt_contract_address,
                 abi=Config.USDT_ABI
             )
             usdt_balance_raw = usdt_contract.functions.balanceOf(address).call()
             usdt_balance = usdt_balance_raw / 10**6  # USDT has 6 decimals
-            
+
             return {
                 "eth_balance": float(eth_balance),
                 "usdt_balance": float(usdt_balance),
                 "address": address,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             print(f"? Balance check failed: {e}")
             return {"eth_balance": 0, "usdt_balance": 0, "error": str(e)}
@@ -417,10 +466,46 @@ class SecurityManager:
         # Production rate limiting would be implemented here
         return True
 
+from eth_account import Account
+from fastapi import FastAPI, Depends, HTTPException
+
+app = FastAPI(
+    title="Ortenberg Crypto Host API",
+    description="Enterprise-grade cryptocurrency processing system",
+    version="2.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
 # Initialize components
 wallet_manager = MasterWalletManager()
 transaction_processor = TransactionProcessor(wallet_manager)
 security = HTTPBearer()
+
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
+def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    if credentials.credentials not in Config.VALID_API_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return credentials.credentials
+
+@app.post("/api/v2/testnet/generate-wallet")
+async def generate_test_wallet(api_key: str = Depends(verify_api_key)):
+    """
+    Generate a new Ethereum wallet for testnet use.
+    Returns the address and private key.
+    """
+    try:
+        acct = Account.create()
+        return {
+            "success": True,
+            "address": acct.address,
+            "private_key": acct.key.hex()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Wallet generation failed: {str(e)}")
 
 # FastAPI Application
 app = FastAPI(
@@ -430,6 +515,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Mount static files for UI
+app.mount("/ui", StaticFiles(directory="ui"), name="ui")
 
 # CORS Configuration
 app.add_middleware(
@@ -445,20 +533,114 @@ def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)
     return SecurityManager.verify_api_key(credentials)
 
 # API Endpoints
+import importlib.util
+import sys
+import os
+
 @app.get("/")
 async def root():
     """Root endpoint"""
     master_wallet = wallet_manager.get_master_wallet()
+    
+    # Import updated_config_dynamic
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+    spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
+    config = importlib.util.module_from_spec(spec)
+    sys.modules["updated_config_dynamic"] = config
+    spec.loader.exec_module(config)
+    
+    network = getattr(config.config, "NETWORK", "mainnet")
+    environment = Config.ENVIRONMENT
+    supported_networks = []
+    if network == "mainnet":
+        supported_networks = ["ethereum_mainnet"]
+    elif network == "sepolia":
+        supported_networks = ["sepolia_testnet"]
+    else:
+        supported_networks = [network]
+
     return {
         "service": "Ortenberg Crypto Host API",
         "version": "2.0.0",
         "status": "operational",
         "timestamp": datetime.now().isoformat(),
-        "environment": Config.ENVIRONMENT,
+        "environment": environment,
         "master_wallet": master_wallet["address"],
-        "supported_networks": ["ethereum_mainnet"],
+        "supported_networks": supported_networks,
         "supported_tokens": ["USDT", "ETH"]
     }
+
+from fastapi import Body
+
+class DepositRequest(BaseModel):
+    sender: str = Field(..., description="Sender wallet address")
+    amount: str = Field(..., description="ETH amount to deposit")
+    destination_address: str = Field(..., description="Destination wallet address")
+    nonce: Optional[int] = Field(None, description="Optional nonce for transaction ordering")
+
+@app.post("/api/v2/broadcast/deposit")
+async def broadcast_deposit(
+    deposit_info: DepositRequest,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Endpoint to receive notification of tokenized ETH deposit from institutional system
+    and broadcast the corresponding transaction on Ethereum network.
+    """
+    try:
+        # Extract fields from validated request
+        sender = deposit_info.sender
+        amount = deposit_info.amount
+        destination_address = deposit_info.destination_address
+        nonce = deposit_info.nonce
+        
+        if not sender or not amount or not destination_address:
+            raise HTTPException(status_code=400, detail="Missing required deposit information")
+        
+        # Validate destination address
+        if not Web3.is_address(destination_address):
+            raise HTTPException(status_code=400, detail="Invalid destination address")
+        
+        # Check master wallet balance for gas
+        master_wallet = wallet_manager.get_master_wallet()
+        balance_info = wallet_manager.get_wallet_balance(master_wallet["address"])
+        eth_balance = balance_info.get("eth_balance", 0)
+        gas_price_gwei = Config.GAS_PRICE_GWEI
+        gas_limit = Config.GAS_LIMIT_ETH
+        
+        estimated_gas_cost_eth = (gas_price_gwei * gas_limit) / 1e9  # Convert gwei to ETH
+        
+        if eth_balance < estimated_gas_cost_eth:
+            raise HTTPException(status_code=400, detail="Insufficient ETH balance for gas fees")
+        
+        # Prepare transaction
+        w3 = wallet_manager.get_web3()
+        tx = {
+            "to": Web3.to_checksum_address(destination_address),
+            "value": w3.to_wei(amount, "ether"),
+            "gas": gas_limit,
+            "gasPrice": w3.to_wei(gas_price_gwei, "gwei"),
+            "nonce": nonce if nonce is not None else w3.eth.get_transaction_count(master_wallet["address"]),
+            "chainId": getattr(Config, "CHAIN_ID", 1)
+        }
+        
+        # Sign transaction
+        signed_tx = w3.eth.account.sign_transaction(tx, master_wallet["private_key"])
+        
+        # Send transaction
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash_hex = tx_hash.hex()
+        
+        return {
+            "success": True,
+            "message": "Deposit broadcast transaction submitted",
+            "transaction_hash": tx_hash_hex
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Broadcast failed: {str(e)}")
 
 @app.get("/health")
 async def health_check():

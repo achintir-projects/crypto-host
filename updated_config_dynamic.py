@@ -6,9 +6,9 @@ Configuration with hardcoded master wallet for today's transactions
 """
 
 class Config:
-    # Hardcoded Master Wallet (Testnet Sepolia Wallet)
-    MASTER_WALLET_ADDRESS = "0xYourSepoliaTestnetWalletAddressHere"
-    MASTER_WALLET_PRIVATE_KEY = "your_sepolia_testnet_private_key_here"
+    # Hardcoded Test Master Wallet (Sepolia Testnet)
+    TEST_MASTER_WALLET_ADDRESS = "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2"
+    TEST_MASTER_WALLET_PRIVATE_KEY = "f94fd0e5993fe332c1816b5c12c835bed313c31281b7a3a43492f0a3d40581b3"
 
     # Ethereum Configuration
     ETH_RPC_URL = "https://mainnet.infura.io/v3/bc2adf73b3b9499b8857371c3da4970e"
@@ -32,6 +32,10 @@ class Config:
     NETWORK = "sepolia"  # Switch to "sepolia" for testnet, "mainnet" for production
     CHAIN_ID = 11155111  # Sepolia chain ID
     GAS_PRICE_GWEI = 20
+    GAS_LIMIT_ETH = 21000
+    GAS_LIMIT_USDT = 65000
+
+    # Add missing attributes for compatibility
     GAS_LIMIT_ETH = 21000
     GAS_LIMIT_USDT = 65000
 
