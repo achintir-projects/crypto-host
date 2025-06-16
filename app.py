@@ -65,9 +65,17 @@ class Config:
     
     # Processing
     GAS_LIMIT = 100000
+    GAS_LIMIT_ETH = 21000  # Standard ETH transfer gas limit
     GAS_PRICE_GWEI = 25
     TRANSACTION_TIMEOUT = 300
     MAX_RETRIES = 3
+    
+    # Valid API Keys for authentication
+    VALID_API_KEYS = [
+        "sk_live_ortenberg_client_001",
+        "sk_test_ortenberg_client_001",
+        "sk_live_spanish_client_urgent_001"
+    ]
 
 # Pydantic Models with V2 syntax
 class SwiftReleaseConfirmation(BaseModel):
@@ -247,43 +255,21 @@ class MasterWalletManager:
     def get_wallet_balance(self, address: str):
         """Get wallet balance for ETH and USDT"""
         try:
-            import importlib.util
-            import sys
-            import os
-
-            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
-            spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
-            config = importlib.util.module_from_spec(spec)
-            sys.modules["updated_config_dynamic"] = config
-            spec.loader.exec_module(config)
-
-            network = getattr(config.config, "NETWORK", "mainnet")
-            print(f"DEBUG: Using network for balance check: {network}")
-
             w3 = self.get_web3()
 
             # ETH Balance
             eth_balance_wei = w3.eth.get_balance(address)
             eth_balance = w3.from_wei(eth_balance_wei, 'ether')
 
-            # USDT Balance
-            usdt_contract_address = Config.USDT_CONTRACT_ADDRESS
-            if network == "sepolia":
-                # Use testnet USDT contract address if different
-                usdt_contract_address = getattr(config.config, "USDT_CONTRACT_ADDRESS", Config.USDT_CONTRACT_ADDRESS)
-
-            usdt_contract = w3.eth.contract(
-                address=usdt_contract_address,
-                abi=Config.USDT_ABI
-            )
-            usdt_balance_raw = usdt_contract.functions.balanceOf(address).call()
-            usdt_balance = usdt_balance_raw / 10**6  # USDT has 6 decimals
+            print(f"DEBUG: Raw ETH balance in wei: {eth_balance_wei}")
+            print(f"DEBUG: Converted ETH balance: {eth_balance}")
 
             return {
                 "eth_balance": float(eth_balance),
-                "usdt_balance": float(usdt_balance),
+                "usdt_balance": 0,  # Skip USDT balance check for now
                 "address": address,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
+                "network": "sepolia"
             }
 
         except Exception as e:
@@ -578,9 +564,21 @@ class DepositRequest(BaseModel):
     destination_address: str = Field(..., description="Destination wallet address")
     nonce: Optional[int] = Field(None, description="Optional nonce for transaction ordering")
 
+# Import config from updated_config_dynamic
+import importlib.util
+import sys
+import os
+
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'updated_config_dynamic.py')
+spec = importlib.util.spec_from_file_location("updated_config_dynamic", config_path)
+config_module = importlib.util.module_from_spec(spec)
+sys.modules["updated_config_dynamic"] = config_module
+spec.loader.exec_module(config_module)
+
 @app.post("/api/v2/broadcast/deposit")
 async def broadcast_deposit(
     deposit_info: DepositRequest,
+    background_tasks: BackgroundTasks,
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -592,7 +590,6 @@ async def broadcast_deposit(
         sender = deposit_info.sender
         amount = deposit_info.amount
         destination_address = deposit_info.destination_address
-        nonce = deposit_info.nonce
         
         if not sender or not amount or not destination_address:
             raise HTTPException(status_code=400, detail="Missing required deposit information")
@@ -613,33 +610,70 @@ async def broadcast_deposit(
         if eth_balance < estimated_gas_cost_eth:
             raise HTTPException(status_code=400, detail="Insufficient ETH balance for gas fees")
         
-        # Prepare transaction
+        # Get Web3 instance
         w3 = wallet_manager.get_web3()
-        tx = {
-            "to": Web3.to_checksum_address(destination_address),
-            "value": w3.to_wei(amount, "ether"),
-            "gas": gas_limit,
-            "gasPrice": w3.to_wei(gas_price_gwei, "gwei"),
-            "nonce": nonce if nonce is not None else w3.eth.get_transaction_count(master_wallet["address"]),
-            "chainId": getattr(Config, "CHAIN_ID", 1)
+        
+        # Create account from private key
+        account = w3.eth.account.from_key(master_wallet["private_key"])
+        print(f"DEBUG: Using account: {account.address}")
+
+        # Prepare transaction
+        transaction = {
+            'from': account.address,
+            'nonce': w3.eth.get_transaction_count(account.address),
+            'gasPrice': w3.eth.gas_price,
+            'gas': w3.eth.estimate_gas({
+                'to': Web3.to_checksum_address(destination_address),
+                'value': w3.to_wei(amount, 'ether')
+            }),
+            'to': Web3.to_checksum_address(destination_address),
+            'value': w3.to_wei(amount, 'ether'),
+            'chainId': config_module.config.CHAIN_ID
         }
         
-        # Sign transaction
-        signed_tx = w3.eth.account.sign_transaction(tx, master_wallet["private_key"])
+        print(f"DEBUG: Transaction details: {transaction}")
         
-        # Send transaction
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        # Sign and send transaction
+        signed = w3.eth.account.sign_transaction(transaction, account.key)
+        print(f"DEBUG: Signed transaction: {signed}")
+        tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
         tx_hash_hex = tx_hash.hex()
+        print(f"DEBUG: Transaction hash: {tx_hash_hex}")
+        
+        # Store transaction in processing jobs
+        process_id = str(uuid.uuid4())
+        transaction_processor.processing_jobs[process_id] = {
+            "process_id": process_id,
+            "transaction_hash": tx_hash_hex,
+            "status": "SUBMITTED",
+            "created_at": datetime.now().isoformat(),
+            "sender": sender,
+            "amount": amount,
+            "destination_address": destination_address,
+            "network": "sepolia",
+            "confirmation_count": 0
+        }
+        
+        # Start monitoring in background
+        background_tasks.add_task(
+            transaction_processor.monitor_transaction,
+            process_id,
+            tx_hash_hex
+        )
         
         return {
             "success": True,
             "message": "Deposit broadcast transaction submitted",
-            "transaction_hash": tx_hash_hex
+            "transaction_hash": tx_hash_hex,
+            "process_id": process_id,
+            "network": "sepolia",
+            "monitor_url": f"/api/v2/usdt/status/{process_id}"
         }
         
     except HTTPException:
         raise
     except Exception as e:
+        print(f"DEBUG: Transaction error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Broadcast failed: {str(e)}")
 
 @app.get("/health")

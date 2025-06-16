@@ -19,6 +19,12 @@
             <div class="flex justify-between items-center py-6">
                 <h1 class="text-2xl font-bold text-white">Deposit Transaction Dashboard</h1>
                 <div class="flex space-x-4">
+                    <div class="flex items-center mr-4">
+                        <select id="environmentSelect" class="bg-gray-700 text-white px-4 py-2 rounded-md">
+                            <option value="test">Test Environment</option>
+                            <option value="production">Production Environment</option>
+                        </select>
+                    </div>
                     <button id="refreshBtn" class="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition-colors">
                         Refresh Data
                     </button>
@@ -30,10 +36,18 @@
         </div>
     </div>
 
+    <!-- Environment Banner -->
+    <div id="testBanner" class="bg-yellow-500 text-black py-2 text-center font-bold">
+        TEST ENVIRONMENT - Sepolia Testnet
+    </div>
+    <div id="productionBanner" class="bg-red-600 text-white py-2 text-center font-bold hidden">
+        PRODUCTION ENVIRONMENT - Ethereum Mainnet
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-gray-800 p-6 rounded-lg shadow">
                 <h3 class="text-sm font-medium text-gray-400">Total Deposits</h3>
                 <p class="text-2xl font-semibold text-white" id="totalDeposits">-</p>
@@ -45,6 +59,10 @@
             <div class="bg-gray-800 p-6 rounded-lg shadow">
                 <h3 class="text-sm font-medium text-gray-400">Success Rate</h3>
                 <p class="text-2xl font-semibold text-white" id="successRate">-</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-400">Network</h3>
+                <p class="text-2xl font-semibold text-white" id="currentNetwork">Sepolia</p>
             </div>
         </div>
 
@@ -58,6 +76,7 @@
                     <thead class="bg-gray-900">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction Hash</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Environment</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Timestamp</th>
@@ -76,6 +95,7 @@
     <div id="depositModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center">
         <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <h2 class="text-xl font-semibold mb-4 text-white">New Deposit</h2>
+            <div id="modalEnvironmentBanner" class="mb-4 py-2 text-center font-bold rounded"></div>
             <form id="depositForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300">Sender Address</label>
@@ -99,8 +119,16 @@
 
     <script>
         // API Configuration
-        const API_KEY = 'sk_live_ortenberg_client_001'; // Replace with your API key
+        const API_KEYS = {
+            test: 'sk_test_ortenberg_client_001',
+            production: 'sk_live_ortenberg_client_001'
+        };
+        const MASTER_WALLETS = {
+            test: '0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2',
+            production: '0x10ead6370820315F6d5a517c2166cBa4a564216b'
+        };
         const API_BASE_URL = window.location.origin;
+        let currentEnvironment = 'test';
 
         // DOM Elements
         const refreshBtn = document.getElementById('refreshBtn');
@@ -109,10 +137,43 @@
         const depositForm = document.getElementById('depositForm');
         const cancelDeposit = document.getElementById('cancelDeposit');
         const transactionsTable = document.getElementById('transactionsTable');
+        const environmentSelect = document.getElementById('environmentSelect');
+        const testBanner = document.getElementById('testBanner');
+        const productionBanner = document.getElementById('productionBanner');
+        const modalEnvironmentBanner = document.getElementById('modalEnvironmentBanner');
+
+        // Environment Change Handler
+        environmentSelect.addEventListener('change', (e) => {
+            currentEnvironment = e.target.value;
+            updateEnvironmentUI();
+            fetchTransactions();
+        });
+
+        function updateEnvironmentUI() {
+            // Update banners
+            testBanner.classList.toggle('hidden', currentEnvironment === 'production');
+            productionBanner.classList.toggle('hidden', currentEnvironment === 'test');
+            
+            // Update network display
+            document.getElementById('currentNetwork').textContent = 
+                currentEnvironment === 'test' ? 'Sepolia' : 'Mainnet';
+
+            // Update modal banner
+            if (currentEnvironment === 'test') {
+                modalEnvironmentBanner.className = 'mb-4 py-2 text-center font-bold rounded bg-yellow-500 text-black';
+                modalEnvironmentBanner.textContent = 'TEST ENVIRONMENT - Sepolia Testnet';
+            } else {
+                modalEnvironmentBanner.className = 'mb-4 py-2 text-center font-bold rounded bg-red-600 text-white';
+                modalEnvironmentBanner.textContent = 'PRODUCTION ENVIRONMENT - Ethereum Mainnet';
+            }
+        }
 
         // Event Listeners
         refreshBtn.addEventListener('click', fetchTransactions);
-        newDepositBtn.addEventListener('click', () => depositModal.classList.remove('hidden'));
+        newDepositBtn.addEventListener('click', () => {
+            updateEnvironmentUI();
+            depositModal.classList.remove('hidden');
+        });
         cancelDeposit.addEventListener('click', () => depositModal.classList.add('hidden'));
         depositForm.addEventListener('submit', handleDeposit);
 
@@ -121,7 +182,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v2/usdt/history`, {
                     headers: {
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Authorization': `Bearer ${API_KEYS[currentEnvironment]}`
                     }
                 });
                 const data = await response.json();
@@ -151,7 +212,13 @@
         function updateTransactionsTable(transactions) {
             transactionsTable.innerHTML = transactions.map(tx => `
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${tx.transaction_hash || 'Pending'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tx.transaction_hash || 'Pending'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${tx.network === 'sepolia' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${tx.network === 'sepolia' ? 'TEST' : 'PRODUCTION'}
+                        </span>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                             ${tx.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 
@@ -160,11 +227,11 @@
                             ${tx.status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${tx.amount || '-'} ETH</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(tx.timestamp).toLocaleString()}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button onclick="viewTransaction('${tx.transaction_hash}')" 
-                                class="text-blue-600 hover:text-blue-900">View</button>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tx.amount || '-'} ETH</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${new Date(tx.timestamp).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="viewTransaction('${tx.transaction_hash}', '${tx.network}')" 
+                                class="text-blue-400 hover:text-blue-300">View</button>
                     </td>
                 </tr>
             `).join('');
@@ -178,15 +245,14 @@
             const depositData = {
                 sender: formData.get('sender'),
                 amount: formData.get('amount'),
-                destination_address: formData.get('destination_address'),
-                nonce: null  // Optional nonce field
+                destination_address: formData.get('destination_address')
             };
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v2/broadcast/deposit`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
+                        'Authorization': `Bearer ${API_KEYS[currentEnvironment]}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(depositData)
@@ -209,13 +275,17 @@
         }
 
         // View transaction details
-        function viewTransaction(txHash) {
+        function viewTransaction(txHash, network) {
             if (txHash) {
-                window.open(`https://etherscan.io/tx/${txHash}`, '_blank');
+                const baseUrl = network === 'sepolia' ? 
+                    'https://sepolia.etherscan.io/tx/' : 
+                    'https://etherscan.io/tx/';
+                window.open(baseUrl + txHash, '_blank');
             }
         }
 
-        // Initial load
+        // Initial setup
+        updateEnvironmentUI();
         fetchTransactions();
     </script>
 </body>

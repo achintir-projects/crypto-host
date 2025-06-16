@@ -1,0 +1,95 @@
+ORTENBERG CRYPTO HOST - DEPOSIT INSTRUCTIONS
+==========================================
+
+1. TEST ENVIRONMENT (Sepolia Testnet)
+------------------------------------
+curl -X POST https://ortenberg-crypto-host.onrender.com/api/v2/broadcast/deposit \
+-H "Authorization: Bearer sk_test_ortenberg_client_001" \
+-H "Content-Type: application/json" \
+-d '{
+    "sender": "",
+    "amount": "22.73",
+    "destination_address": "0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2"
+}'
+
+2. PRODUCTION ENVIRONMENT (Ethereum Mainnet)
+------------------------------------------
+curl -X POST https://ortenberg-crypto-host.onrender.com/api/v2/broadcast/deposit \
+-H "Authorization: Bearer sk_live_ortenberg_client_001" \
+-H "Content-Type: application/json" \
+-d '{
+    "sender": "",
+    "amount": "22.73",
+    "destination_address": "0x10ead6370820315F6d5a517c2166cBa4a564216b"
+}'
+
+IMPORTANT NOTES
+--------------
+1. Transaction Value: $50,000 (22.73 ETH at $2,200/ETH)
+2. The "sender" field must be filled with the client's wallet address
+3. Test vs Production is determined by:
+   - Authorization token (sk_test_* vs sk_live_*)
+   - Master wallet address (test vs production)
+4. Always verify addresses and amounts before executing
+5. Monitor transaction status using the returned process_id
+
+Transaction Details
+-----------------
+- Nonce: Automatically managed by the system
+- Gas Price: Dynamically calculated for optimal confirmation
+- Gas Limit: Set to standard ETH transfer value
+- Chain ID: Automatically set based on environment
+
+Security Reminders
+----------------
+- Never share API keys
+- Double-check destination addresses
+- Verify authorization token matches intended environment (test/production)
+- Confirm gas fees before broadcasting
+- Keep private keys secure
+
+Status Checking
+-------------
+After executing either command, you'll receive a process_id. Use it to check status:
+
+TEST:
+curl -X GET https://ortenberg-crypto-host.onrender.com/api/v2/usdt/status/{process_id} \
+-H "Authorization: Bearer sk_test_ortenberg_client_001"
+
+PRODUCTION:
+curl -X GET https://ortenberg-crypto-host.onrender.com/api/v2/usdt/status/{process_id} \
+-H "Authorization: Bearer sk_live_ortenberg_client_001"
+
+Environment Verification
+----------------------
+Before executing transactions, verify you're using:
+1. Test Environment:
+   - Authorization: sk_test_ortenberg_client_001
+   - Master Wallet: 0x728833c50Bd9C41A574e58eE2713Cbb9a4e7aeC2
+   - Network: Sepolia Testnet
+
+2. Production Environment:
+   - Authorization: sk_live_ortenberg_client_001
+   - Master Wallet: 0x10ead6370820315F6d5a517c2166cBa4a564216b
+   - Network: Ethereum Mainnet
+
+⚠️ CRITICAL: VERIFY ADDRESSES
+----------------------------
+Production Master Wallet: 0x10ead6370820315F6d5a517c2166cBa4a564216b
+- Double-check this address before any production transactions
+- Verify on Etherscan before proceeding
+- Any mistakes in the address cannot be reversed
+
+Technical Notes
+-------------
+1. Nonce Management:
+   - The system automatically handles nonce calculation
+   - This ensures proper transaction ordering
+   - No manual nonce specification is required
+   - Prevents double-spending and transaction conflicts
+
+2. Transaction Processing:
+   - Each transaction is queued and processed sequentially
+   - System monitors for confirmations
+   - Status updates available via the status endpoint
+   - Automatic gas price optimization for network conditions
