@@ -508,10 +508,10 @@ app.mount("/ui", StaticFiles(directory="ui"), name="ui")
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8001", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "Authorization"],
 )
 
 # Dependency for API key verification

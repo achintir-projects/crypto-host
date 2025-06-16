@@ -195,8 +195,24 @@
                 console.log('Response data:', data);
                 
                 if (data.success) {
+                    // Fetch full details for each transaction
+                    const transactions = await Promise.all(
+                        data.data.transactions.map(async tx => {
+                            const detailsResponse = await fetch(
+                                `${API_BASE_URL}/api/v2/usdt/status/${tx.process_id}`,
+                                {
+                                    headers: {
+                                        'Authorization': `Bearer ${API_KEYS[currentEnvironment]}`
+                                    }
+                                }
+                            );
+                            const details = await detailsResponse.json();
+                            return details.data;
+                        })
+                    );
+                    
                     updateStats(data.data);
-                    updateTransactionsTable(data.data.transactions);
+                    updateTransactionsTable(transactions);
                 }
             } catch (error) {
                 console.error('Error fetching transactions:', error);
@@ -232,8 +248,8 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${(['sepolia', 'testnet'].includes(tx.network) ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')}">
-                            ${(['sepolia', 'testnet'].includes(tx.network) ? 'TEST' : 'PRODUCTION')}
+                            ${(['sepolia', 'testnet'].includes(tx.network.toLowerCase()) ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')}">
+                            ${(['sepolia', 'testnet'].includes(tx.network.toLowerCase()) ? 'TEST' : 'PRODUCTION')}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
